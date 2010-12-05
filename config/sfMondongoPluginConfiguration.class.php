@@ -38,8 +38,8 @@ class sfMondongoPluginConfiguration extends sfPluginConfiguration
 
     $loader = new Symfony\Component\HttpFoundation\UniversalClassLoader();
     $loader->registerNamespaces(array(
-      'Mondongo\\Extension\\Extra' => sfConfig::get('sf_mondongo-extensions_lib_dir', dirname(__FILE__).'/../lib/vendor/mondongo-extensions-extra/lib'),
-      'Mondongo' => sfConfig::get('sf_mondongo_lib_dir', dirname(__FILE__).'/../lib/vendor/mondongo/lib')
+      'Mondongo\Behavior' => sfConfig::get('sf_mondongo_behaviors_lib_dir', dirname(__FILE__).'/../lib/vendor/mondongo-behaviors/lib'),
+      'Mondongo'          => sfConfig::get('sf_mondongo_lib_dir', dirname(__FILE__).'/../lib/vendor/mondongo/lib')
     ));
     $loader->register();
 

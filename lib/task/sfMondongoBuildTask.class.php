@@ -57,12 +57,9 @@ EOF;
     $mondator->setConfigClasses($this->prepareConfigClasses());
     $mondator->setExtensions(array(
       new Mondongo\Extension\Core(array(
-        'default_document_output'   => sfConfig::get('sf_lib_dir').'/model/mondongo',
-        'default_repository_output' => sfConfig::get('sf_lib_dir').'/model/mondongo',
+        'default_output' => sfConfig::get('sf_lib_dir').'/model/mondongo',
       )),
       new sfMondongoExtensionPluginClasses(),
-      new Mondongo\Extension\DocumentDataCamelCaseMap(),
-      new Mondongo\Extension\DocumentFromToArray(),
       new Mondongo\Extension\DocumentArrayAccess(),
       new Mondongo\Extension\DocumentPropertyOverloading(),
       new Mondongo\Extension\DocumentDataMap(),
