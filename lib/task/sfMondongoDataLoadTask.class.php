@@ -32,6 +32,10 @@ class sfMondongoDataLoadTask extends sfMondongoTask
    */
   protected function configure()
   {
+    $this->addArguments(array(
+      new sfCommandArgument('dir_or_file', sfCommandArgument::OPTIONAL | sfCommandArgument::IS_ARRAY, 'Directory or file to load', array('data/mondongo')),
+    ));
+    
     $this->addOptions(array(
       new sfCommandOption('application', null, sfCommandOption::PARAMETER_OPTIONAL, 'The application', true),
       new sfCommandOption('env', null, sfCommandOption::PARAMETER_REQUIRED, 'The environment', 'dev'),
@@ -42,6 +46,7 @@ class sfMondongoDataLoadTask extends sfMondongoTask
     $this->briefDescription = 'Load fixture data';
 
     $this->detailedDescription = <<<EOF
+    
 EOF;
   }
 
@@ -58,17 +63,11 @@ EOF;
     {
       $connection->getMongoDB()->drop();
     }
-
+    
     $this->logSection('mondongo', 'parsing data');
 
     $data = array();
-    foreach (sfFinder::type('file')
-      ->name('*.yml')
-      ->sort_by_name()
-      ->follow_link()
-      ->in(sfConfig::get('sf_data_dir').'/mondongo')
-    as $file)
-    {
+    foreach ($this->_prepareFiles($arguments['dir_or_file']) as $file) {
       $data = sfToolkit::arrayDeepMerge($data, sfYaml::load($file));
     }
 
@@ -156,5 +155,31 @@ EOF;
     {
       throw new RuntimeException('Unable to process everything.');
     }
+  }
+  
+  /**
+   * 
+   * Prepare files. It add root project path and if the dir provided look for yml files in it.
+   * 
+   * @param array $files
+   * 
+   * @return array of yml files
+   */
+  protected function _prepareFiles(array $files)
+  {
+    $finder = sfFinder::type('file')->name('*.yml')->sort_by_name()->follow_link();
+    $rootDir = sfConfig::get('sf_root_dir');
+    
+    $preparedFiles = array();
+    foreach ($files as $file) {
+      $file = "$rootDir/$file";
+      if (is_dir($file)) {
+        $preparedFiles = array_merge($preparedFiles, $finder->in($file));
+      } else {
+        $preparedFiles[] = $file;
+      }
+    }
+    
+    return $preparedFiles;
   }
 }
