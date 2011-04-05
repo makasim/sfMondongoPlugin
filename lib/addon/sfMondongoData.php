@@ -125,6 +125,16 @@ class sfMondongoData extends sfData
                 unset($datum[$name]);
               }
             }
+            
+            // quick fix. Our app use custom _id field and generate int values for it
+            if (isset($datum['_id']) && is_numeric($datum['_id'])) {
+              $hexLenght = 24;
+              $id = (string) $datum['_id'];
+              $id = str_pad($id, $hexLenght, '0', STR_PAD_LEFT);
+              $id = new MongoId($id);
+              
+              $datum['_id'] = $id;
+            }
 
             $document = new $class();
             $document->fromArray($datum);
