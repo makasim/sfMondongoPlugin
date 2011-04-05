@@ -126,16 +126,6 @@ class sfMondongoData extends sfData
               }
             }
             
-            // quick fix. Our app use custom _id field and generate int values for it
-            if (isset($datum['_id']) && is_numeric($datum['_id'])) {
-              $hexLenght = 24;
-              $id = (string) $datum['_id'];
-              $id = str_pad($id, $hexLenght, '0', STR_PAD_LEFT);
-              $id = new MongoId($id);
-              
-              $datum['_id'] = $id;
-            }
-
             $document = new $class();
             $document->fromArray($datum);
             $document->save();
@@ -185,7 +175,7 @@ class sfMondongoData extends sfData
    *
    * @throws sfException If a class mentioned in a fixture can not be found
    */
-  protected function doDropMongoDB()
+  public function doDropMongoDB()
   {
     if (false === $this->deleteCurrentData) return;
     
