@@ -39,6 +39,7 @@ class sfMondongoDataLoadTask extends sfMondongoTask
     $this->addOptions(array(
       new sfCommandOption('application', null, sfCommandOption::PARAMETER_OPTIONAL, 'The application', true),
       new sfCommandOption('env', null, sfCommandOption::PARAMETER_REQUIRED, 'The environment', 'dev'),
+      new sfCommandOption('append', null, sfCommandOption::PARAMETER_NONE, 'Don\'t delete current data in the database'),
     ));
 
     $this->namespace = 'mondongo';
@@ -55,7 +56,11 @@ EOF;
    */
   protected function execute($arguments = array(), $options = array())
   {
+     sfContext::createInstance($this->configuration);
+     
      $dataLoad = new sfMondongoData($this->getMondongo());
+     $dataLoad->setDeleteCurrentData(!$options['append']);
+     $dataLoad->doDropMongoDB();
      $dataLoad->loadData($arguments['dir_or_file']);
   }
 }

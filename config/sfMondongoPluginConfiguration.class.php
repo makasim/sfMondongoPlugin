@@ -34,12 +34,12 @@ class sfMondongoPluginConfiguration extends sfPluginConfiguration
    */
   public function initialize()
   {
-    require_once(dirname(__FILE__).'/../lib/vendor/mondongo/lib/vendor/symfony/src/Symfony/Component/HttpFoundation/UniversalClassLoader.php');
+    require_once(dirname(__FILE__).'/../lib/vendor/mondongo/src/vendor/symfony/src/Symfony/Component/ClassLoader/UniversalClassLoader.php');
 
-    $loader = new Symfony\Component\HttpFoundation\UniversalClassLoader();
+    $loader = new Symfony\Component\ClassLoader\UniversalClassLoader();
     $loader->registerNamespaces(array(
       'Mondongo\Behavior' => sfConfig::get('sf_mondongo_behaviors_lib_dir', dirname(__FILE__).'/../lib/vendor/mondongo-behaviors/lib'),
-      'Mondongo'          => sfConfig::get('sf_mondongo_lib_dir', dirname(__FILE__).'/../lib/vendor/mondongo/lib')
+      'Mondongo'          => sfConfig::get('sf_mondongo_lib_dir', dirname(__FILE__).'/../lib/vendor/mondongo/src')
     ));
     $loader->register();
 
@@ -60,8 +60,11 @@ class sfMondongoPluginConfiguration extends sfPluginConfiguration
   public function listenToContextLoadFactories(sfEvent $event)
   {
     $context = $event->getSubject();
+    
+    // log
+    $loggerCallable = sfConfig::get('sf_logging_enabled') ? array($this, 'log') : null;
 
-    $mondongo = new Mondongo\Mondongo();
+    $mondongo = new Mondongo\Mondongo(new MondongoMetadata(), $loggerCallable);
 
     // databases
     $databaseManager = $context->getDatabaseManager();
@@ -74,22 +77,17 @@ class sfMondongoPluginConfiguration extends sfPluginConfiguration
       }
     }
 
-    // log
-    if (sfConfig::get('sf_logging_enabled'))
+    if (sfConfig::get('sf_logging_enabled') && sfConfig::get('sf_web_debug'))
     {
-      $mondongo->setLoggerCallable(array($this, 'log'));
-
-      if (sfConfig::get('sf_web_debug'))
-      {
-        $this->dispatcher->connect('debug.web.load_panels', array($this, 'listenToDebugWebLoadPanels'));
-      }
+      $this->dispatcher->connect('debug.web.load_panels', array($this, 'listenToDebugWebLoadPanels'));
     }
 
     // context
     $context->set('mondongo', $mondongo);
 
     // container
-    Mondongo\Container::setDefault($mondongo);
+    Mondongo\Container::setDefaultName('default');
+    Mondongo\Container::set('default', $mondongo);
   }
 
   /**

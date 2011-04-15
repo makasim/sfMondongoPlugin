@@ -41,24 +41,7 @@ abstract class sfMondongoTask extends sfBaseTask
    */
   protected function getMondongo()
   {
-    if (null === $this->mondongo)
-    {
-      $this->mondongo = new Mondongo();
-
-      $databaseManager = new sfDatabaseManager($this->configuration);
-      foreach ($databaseManager->getNames() as $name)
-      {
-        $database = $databaseManager->getDatabase($name);
-        if ($database instanceof sfMondongoDatabase)
-        {
-          $this->mondongo->setConnection($name, $database->getMondongoConnection());
-        }
-      }
-
-      Container::setDefault($this->mondongo);
-    }
-
-    return $this->mondongo;
+    return sfContext::getInstance()->getMondongo();
   }
 
   /**

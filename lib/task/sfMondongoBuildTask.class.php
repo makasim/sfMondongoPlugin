@@ -58,11 +58,13 @@ EOF;
     $mondator->setExtensions(array(
       new Mondongo\Extension\Core(array(
         'default_output' => sfConfig::get('sf_lib_dir').'/model/mondongo',
+        'metadata_class' => sfConfig::get('sf_mondongo_metadata_class', 'MondongoMetadata'),
+        'metadata_output' => sfConfig::get('sf_mondongo_metadata_output', sfConfig::get('sf_lib_dir').'/model/mondongo')
       )),
       new sfMondongoExtensionPluginClasses(),
       new Mondongo\Extension\DocumentArrayAccess(),
       new Mondongo\Extension\DocumentPropertyOverloading(),
-      new Mondongo\Extension\DocumentDataMap(),
+      //new Mondongo\Extension\DocumentDataMap(),
       new sfMondongoExtensionForms(array(
         'output' => sfConfig::get('sf_lib_dir').'/form/mondongo',
       )),
