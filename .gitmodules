@@ -1,6 +1,0 @@
-[submodule "lib/vendor/mondongo"]
-	path = lib/vendor/mondongo
-	url = https://github.com/makasim/mondongo.git
-[submodule "lib/vendor/mondongo-behaviors"]
-	path = lib/vendor/mondongo-behaviors
-	url = https://github.com/makasim/mondongo.git
