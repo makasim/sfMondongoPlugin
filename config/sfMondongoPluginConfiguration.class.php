@@ -34,7 +34,9 @@ class sfMondongoPluginConfiguration extends sfPluginConfiguration
    */
   public function initialize()
   {
-    require_once(dirname(__FILE__).'/../lib/vendor/mondongo/src/vendor/symfony/src/Symfony/Component/ClassLoader/UniversalClassLoader.php');
+    if (false === class_exists('Symfony\Component\ClassLoader\UniversalClassLoader', false)) {    
+      require_once(dirname(__FILE__).'/../lib/vendor/mondongo/src/vendor/symfony/src/Symfony/Component/ClassLoader/UniversalClassLoader.php');
+    }
 
     $loader = new Symfony\Component\ClassLoader\UniversalClassLoader();
     $loader->registerNamespaces(array(
