@@ -33,9 +33,9 @@ class sfMondongoDataLoadTask extends sfMondongoTask
   protected function configure()
   {
     $this->addArguments(array(
-      new sfCommandArgument('dir_or_file', sfCommandArgument::OPTIONAL | sfCommandArgument::IS_ARRAY, 'Directory or file to load', array('data/mondongo')),
+      new sfCommandArgument('dir_or_file', sfCommandArgument::OPTIONAL | sfCommandArgument::IS_ARRAY, 'Directory or file to load'),
     ));
-    
+
     $this->addOptions(array(
       new sfCommandOption('application', null, sfCommandOption::PARAMETER_OPTIONAL, 'The application', true),
       new sfCommandOption('env', null, sfCommandOption::PARAMETER_REQUIRED, 'The environment', 'dev'),
@@ -47,7 +47,7 @@ class sfMondongoDataLoadTask extends sfMondongoTask
     $this->briefDescription = 'Load fixture data';
 
     $this->detailedDescription = <<<EOF
-    
+
 EOF;
   }
 
@@ -57,10 +57,35 @@ EOF;
   protected function execute($arguments = array(), $options = array())
   {
      sfContext::createInstance($this->configuration);
-     
-     $dataLoad = new sfMondongoData($this->getMondongo());
-     $dataLoad->setDeleteCurrentData(!$options['append']);
-     $dataLoad->doDropMongoDB();
-     $dataLoad->loadData($arguments['dir_or_file']);
+
+     $this->logSection('mondongo', 'parsing data');
+
+     if (!$arguments['dir_or_file']) {
+        $arguments['dir_or_file'] = array(sfConfig::get('sf_root_dir').'/data/mondongo');
+     }
+
+     $finder = sfFinder::type('file')->name('*.yml')->sort_by_name()->follow_link();
+     $files = array();
+     foreach ($arguments['dir_or_file'] as $dirOrFile) {
+        if (is_dir($dirOrFile)) {
+            $files = array_merge($files, $finder->in($dirOrFile));
+        } elseif (is_file($dirOrFile)) {
+            $files[] = $dirOrFile;
+        } else {
+            throw new \InvalidArgumentException(sprintf('"%s" is not a dir or file.', $dirOrFile));
+        }
+     }
+     $files = array_unique($files);
+
+     $data = array();
+     foreach ($files as $file) {
+        $data = sfToolkit::arrayDeepMerge(sfYaml::load($file));
+     }
+
+     $this->logSection('mondongo', 'loading data');
+
+     $dataLoader = new Mondongo\DataLoader($this->getMondongo());
+     $dataLoader->setData($data);
+     $dataLoader->load(!$options['append']);
   }
 }

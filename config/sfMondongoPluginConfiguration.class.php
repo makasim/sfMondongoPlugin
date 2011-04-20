@@ -34,7 +34,7 @@ class sfMondongoPluginConfiguration extends sfPluginConfiguration
    */
   public function initialize()
   {
-    require_once(dirname(__FILE__).'/../lib/vendor/mondongo/src/vendor/symfony/src/Symfony/Component/ClassLoader/UniversalClassLoader.php');
+    require_once(dirname(__FILE__).'/../lib/vendor/symfony-class-loader/UniversalClassLoader.php');
 
     $loader = new Symfony\Component\ClassLoader\UniversalClassLoader();
     $loader->registerNamespaces(array(
@@ -60,7 +60,7 @@ class sfMondongoPluginConfiguration extends sfPluginConfiguration
   public function listenToContextLoadFactories(sfEvent $event)
   {
     $context = $event->getSubject();
-    
+
     // log
     $loggerCallable = sfConfig::get('sf_logging_enabled') ? array($this, 'log') : null;
 
@@ -74,6 +74,10 @@ class sfMondongoPluginConfiguration extends sfPluginConfiguration
       if ($database instanceof sfMondongoDatabase)
       {
         $mondongo->setConnection($name, $database->getMondongoConnection());
+        if ($database->hasParameter('default') && $database->getParameter('default'))
+        {
+            $mondongo->setDefaultConnectionName($name);
+        }
       }
     }
 
