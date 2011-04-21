@@ -19,6 +19,8 @@
  * along with sfMondongoPlugin. If not, see <http://www.gnu.org/licenses/>.
  */
 
+use Mondongo\Query;
+
 /**
  * sfMondongoPager.
  *
@@ -29,7 +31,33 @@
  */
 class sfMondongoPager extends sfPager
 {
-  protected $findOptions = array();
+  protected $query;
+
+  /**
+   * Sets the query.
+   *
+   * @param Mondongo\Query $query The query.
+   */
+  public function setQuery(Query $query)
+  {
+    $this->query = $query;
+  }
+
+  /**
+   * Returns the query.
+   *
+   * @return Mondongo\Query The query.
+   */
+  public function getQuery()
+  {
+    if (!$this->query)
+    {
+        $class = $this->getClass();
+        $this->query = $class::query();
+    }
+
+    return $this->query;
+  }
 
   /**
    * @see sfPager
@@ -38,7 +66,9 @@ class sfMondongoPager extends sfPager
   {
     $this->resetIterator();
 
-    $count = $this->getRepository()->count(isset($this->findOptions['query']) ? $this->findOptions['query'] : array());
+    $query = $this->getQuery();
+
+    $count = $query->count();
     $this->setNbResults($count);
 
     if (0 == $this->getPage() || 0 == $this->getMaxPerPage() || 0 == $this->getNbResults())
@@ -51,8 +81,7 @@ class sfMondongoPager extends sfPager
 
       $this->setLastPage(ceil($this->getNbResults() / $this->getMaxPerPage()));
 
-      $this->findOptions['skip']  = $offset;
-      $this->findOptions['limit'] = $this->getMaxPerPage();
+      $query->limit($this->getMaxPerPage())->skip($offset);
     }
   }
 
@@ -61,7 +90,7 @@ class sfMondongoPager extends sfPager
    */
   public function getResults()
   {
-    return (array) $this->getRepository()->find($this->findOptions);
+    return $this->getQuery()->all();
   }
 
   /**
@@ -69,38 +98,6 @@ class sfMondongoPager extends sfPager
    */
   public function retrieveObject($offset)
   {
-    return $this->getRepository()->findOne(array_merge($this->findOptions, array('skip' => $offset - 1)));
-  }
-
-  /**
-   * Set the find options.
-   *
-   * @param array $findOptions The find options.
-   *
-   * @return void
-   */
-  public function setFindOptions(array $findOptions)
-  {
-    $this->findOptions = $findOptions;
-  }
-
-  /**
-   * Returns the find options.
-   *
-   * @return array The find options
-   */
-  public function getFindOptions()
-  {
-    return $this->findOptions;
-  }
-
-  /**
-   * Returns the repository of the pager class.
-   *
-   * @return Mondongo\Repository The repository of the pager class.
-   */
-  protected function getRepository()
-  {
-    return sfContext::getInstance()->get('mondongo')->getRepository($this->getClass());
+    return $this->getQuery()->skip($offset - 1)->one();
   }
 }

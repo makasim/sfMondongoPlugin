@@ -64,7 +64,6 @@ EOF;
       new sfMondongoExtensionPluginClasses(),
       new Mondongo\Extension\DocumentArrayAccess(),
       new Mondongo\Extension\DocumentPropertyOverloading(),
-      //new Mondongo\Extension\DocumentDataMap(),
       new sfMondongoExtensionForms(array(
         'output' => sfConfig::get('sf_lib_dir').'/form/mondongo',
       )),
